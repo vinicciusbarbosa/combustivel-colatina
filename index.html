@@ -725,8 +725,9 @@ function renderConsulta4(p,f){
   lineChart(document.getElementById("c4wrap"), cats, [{name:FUEL_LABEL[f], color:fuelColor(f), values:data.map(r=>r.v)}],
     {xLabel: dateBR, forceLegend:false, endLabels:false});
   const t = document.getElementById("c4table");
-  t.innerHTML = "<thead><tr><th>Data</th><th class='num'>Valor</th></tr></thead><tbody>"+
-    data.map(r=>"<tr><td>"+dateBRfull(r.d)+"</td><td class='num'>"+money(r.v)+"</td></tr>").join("")+"</tbody>";
+  t.innerHTML = "<thead><tr><th>Posto</th><th>Bairro</th><th>Combustível</th><th class='num'>Valor</th><th>Data</th></tr></thead><tbody>"+
+    data.map(r=>"<tr><td>"+posto.nome+"</td><td>"+posto.bairro+"</td><td>"+FUEL_LABEL[f]+"</td><td class='num'>"+
+      money(r.v)+"</td><td>"+dateBRfull(r.d)+"</td></tr>").join("")+"</tbody>";
 }
 function renderGraficoA(){
   const {months, series} = computeMonthlyByFuel();
