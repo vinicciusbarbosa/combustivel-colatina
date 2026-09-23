@@ -87,6 +87,25 @@
   section.panel{padding-block:22px 48px;}
   .panel h2{font-size:26px;}
   .panel .sub{color:var(--ink-2); font-size:14.5px; margin-top:4px; max-width:64ch; line-height:1.5;}
+  .eyebrow{
+    display:inline-block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--accent-soft-ink); background:var(--accent-soft); border-radius:5px; padding:3px 8px; margin-bottom:8px;
+  }
+
+  details.sqlbox{margin-top:18px; border:1px solid var(--border); border-radius:11px; background:var(--surface); overflow:hidden;}
+  details.sqlbox > summary{
+    cursor:pointer; padding:10px 14px; font-size:13px; font-weight:600; color:var(--ink-2);
+    list-style:none; display:flex; align-items:center; gap:7px;
+  }
+  details.sqlbox > summary::-webkit-details-marker{display:none;}
+  details.sqlbox > summary::before{content:"▸"; color:var(--muted); font-size:11px;}
+  details.sqlbox[open] > summary::before{content:"▾";}
+  details.sqlbox > summary:hover{color:var(--ink);}
+  details.sqlbox pre{
+    margin:0; padding:14px; border-top:1px solid var(--border); background:var(--surface-2);
+    overflow-x:auto; font-size:12px; line-height:1.55; color:var(--ink-2);
+    font-family:"Consolas","SF Mono",ui-monospace,monospace; white-space:pre;
+  }
 
   .card{background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow);}
   .cardpad{padding:16px 18px;}
@@ -208,26 +227,86 @@
 <main class="wrap">
 
   <section class="panel" id="panel-extremos">
+    <span class="eyebrow">Consulta I</span>
     <h2>Onde é mais barato — e mais caro</h2>
-    <p class="sub">Para cada combustível, o menor e o maior preço já registrados no semestre, com o posto, o endereço e a data da coleta.</p>
+    <p class="sub">Escolha um combustível para ver o menor e o maior preço registrados no semestre, com o posto, o endereço, o bairro e a data da coleta.</p>
+    <div class="filters" id="fextremos"></div>
     <div class="extgrid" id="extgrid"></div>
+    <details class="sqlbox">
+      <summary>Ver o SQL desta consulta</summary>
+      <pre>WITH base AS (
+    SELECT c.tipo,
+           p.nome     AS posto,
+           CONCAT(p.logradouro, ', ', p.numero) AS endereco,
+           p.bairro,
+           pc.valor,
+           co.data_coleta,
+           ROW_NUMBER() OVER (PARTITION BY c.id_combustivel
+                              ORDER BY pc.valor ASC,  co.data_coleta ASC) AS rn_menor,
+           ROW_NUMBER() OVER (PARTITION BY c.id_combustivel
+                              ORDER BY pc.valor DESC, co.data_coleta ASC) AS rn_maior
+    FROM preco_coletado pc
+    JOIN coleta      co ON co.id_coleta     = pc.id_coleta
+    JOIN posto       p  ON p.id_posto       = co.id_posto
+    JOIN combustivel c  ON c.id_combustivel = pc.id_combustivel
+)
+SELECT tipo,
+       CASE WHEN rn_menor = 1 THEN 'MENOR' ELSE 'MAIOR' END AS extremo,
+       posto, endereco, bairro, valor, data_coleta
+FROM base
+WHERE rn_menor = 1 OR rn_maior = 1
+ORDER BY tipo, extremo;</pre>
+    </details>
   </section>
 
   <section class="panel" id="panel-medias" hidden>
+    <span class="eyebrow">Consulta II</span>
     <h2>Preço médio por posto</h2>
-    <p class="sub">Média de todas as coletas do semestre e quantas amostras sustentam essa média, posto a posto.</p>
+    <p class="sub">Escolha um combustível para ver, em cada posto, a média de todas as coletas do semestre e quantas amostras sustentam essa média.</p>
     <div class="filters" id="fmedias"></div>
     <div class="tablewrap"><table id="tmedias"></table></div>
+    <details class="sqlbox">
+      <summary>Ver o SQL desta consulta</summary>
+      <pre>SELECT p.nome                  AS posto,
+       p.bairro,
+       c.tipo,
+       ROUND(AVG(pc.valor), 3) AS preco_medio,
+       COUNT(*)                AS qtd_amostras
+FROM preco_coletado pc
+JOIN coleta      co ON co.id_coleta     = pc.id_coleta
+JOIN posto       p  ON p.id_posto       = co.id_posto
+JOIN combustivel c  ON c.id_combustivel = pc.id_combustivel
+GROUP BY p.id_posto, p.nome, p.bairro, c.id_combustivel, c.tipo
+ORDER BY p.nome, c.tipo;</pre>
+    </details>
   </section>
 
   <section class="panel" id="panel-recente" hidden>
+    <span class="eyebrow">Consulta III</span>
     <h2>Preço mais recente</h2>
-    <p class="sub">O último valor coletado em cada posto para cada combustível — o retrato mais atual da base.</p>
+    <p class="sub">Escolha um combustível para ver o último valor coletado em cada posto — o retrato mais atual da base.</p>
     <div class="filters" id="frecente"></div>
     <div class="tablewrap"><table id="trecente"></table></div>
+    <details class="sqlbox">
+      <summary>Ver o SQL desta consulta</summary>
+      <pre>WITH ranked AS (
+    SELECT p.nome AS posto, p.bairro, c.tipo, pc.valor, co.data_coleta,
+           ROW_NUMBER() OVER (PARTITION BY p.id_posto, c.id_combustivel
+                              ORDER BY co.data_coleta DESC) AS rn
+    FROM preco_coletado pc
+    JOIN coleta      co ON co.id_coleta     = pc.id_coleta
+    JOIN posto       p  ON p.id_posto       = co.id_posto
+    JOIN combustivel c  ON c.id_combustivel = pc.id_combustivel
+)
+SELECT posto, bairro, tipo, valor, data_coleta
+FROM ranked
+WHERE rn = 1
+ORDER BY posto, tipo;</pre>
+    </details>
   </section>
 
   <section class="panel" id="panel-evolucao" hidden>
+    <span class="eyebrow">Consulta IV</span>
     <h2>Evolução do preço no tempo</h2>
     <p class="sub">Escolha um combustível e um posto para ver o preço coleta a coleta ao longo do semestre.</p>
     <div class="controls">
@@ -241,7 +320,24 @@
       <div class="tablewrap" id="c4tablewrap" style="margin-top:14px; max-height:220px; overflow-y:auto; box-shadow:none;"><table id="c4table"></table></div>
     </div>
 
-    <div class="grid2" style="margin-top:18px;">
+    <details class="sqlbox">
+      <summary>Ver o SQL desta consulta</summary>
+      <pre>SELECT p.nome AS posto,
+       p.bairro,
+       c.tipo,
+       pc.valor,
+       co.data_coleta
+FROM preco_coletado pc
+JOIN coleta      co ON co.id_coleta     = pc.id_coleta
+JOIN posto       p  ON p.id_posto       = co.id_posto
+JOIN combustivel c  ON c.id_combustivel = pc.id_combustivel
+WHERE p.cnpj = '03.948.877/0003-69'   -- posto escolhido acima
+  AND c.tipo = 'GASOLINA'             -- combustivel escolhido acima
+ORDER BY co.data_coleta;</pre>
+    </details>
+
+    <span class="eyebrow" style="margin-top:28px;">Item II.e — gráficos</span>
+    <div class="grid2" style="margin-top:8px;">
       <div class="card chartcard">
         <div class="charthead"><h3>Preço médio de cada combustível</h3></div>
         <p class="sub" style="margin-top:-4px;">Média mensal entre os 6 postos.</p>
@@ -374,8 +470,8 @@ function renderStats(){
 }
 
 /* ---------- extremos ---------- */
-function renderExtremos(){
-  const data = computeExtremos();
+function renderExtremos(filterF){
+  const data = computeExtremos().filter(d => filterF==null || d.f===filterF);
   const el = document.getElementById("extgrid");
   el.innerHTML = data.map(({f,min,max})=>{
     const pMin = DATA.postos[min.p], pMax = DATA.postos[max.p];
@@ -748,7 +844,8 @@ function initTabs(){
 /* ---------- boot ---------- */
 function boot(){
   renderStats();
-  renderExtremos();
+  renderChips(document.getElementById("fextremos"), f=>renderExtremos(f));
+  renderExtremos(null);
   renderChips(document.getElementById("fmedias"), f=>renderMedias(f));
   renderMedias(null);
   renderChips(document.getElementById("frecente"), f=>renderRecente(f));
