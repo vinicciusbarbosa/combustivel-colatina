@@ -1,0 +1,763 @@
+<title>Combustível Colatina</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+  :root{
+    color-scheme:light;
+    --page:#f6f4ef; --surface:#ffffff; --surface-2:#fcfcfb; --surface-raised:#ffffff;
+    --ink:#16150f; --ink-2:#54534c; --muted:#8b887f; --grid:#e4e1d7; --baseline:#c7c3b6;
+    --border:rgba(16,15,9,0.11);
+    --accent:#0b5d52; --accent-ink:#ffffff; --accent-soft:#e1efeb; --accent-soft-ink:#0b5d52;
+    --good:#0ca30c; --serious:#c1552f;
+    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300;
+    --shadow:0 1px 2px rgba(20,18,10,0.05), 0 8px 20px -12px rgba(20,18,10,0.20);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      color-scheme:dark;
+      --page:#0d0d0c; --surface:#18201d; --surface-2:#1a1a19; --surface-raised:#1e2622;
+      --ink:#f5f4ef; --ink-2:#c6c3b7; --muted:#8f8c82; --grid:#2c2f2a; --baseline:#3a3e37;
+      --border:rgba(255,255,255,0.11);
+      --accent:#3fbfa8; --accent-ink:#06211d; --accent-soft:#153531; --accent-soft-ink:#7fe0cd;
+      --good:#3fc23f; --serious:#e39169;
+      --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#3fae3f;
+      --shadow:0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --page:#0d0d0c; --surface:#18201d; --surface-2:#1a1a19; --surface-raised:#1e2622;
+    --ink:#f5f4ef; --ink-2:#c6c3b7; --muted:#8f8c82; --grid:#2c2f2a; --baseline:#3a3e37;
+    --border:rgba(255,255,255,0.11);
+    --accent:#3fbfa8; --accent-ink:#06211d; --accent-soft:#153531; --accent-soft-ink:#7fe0cd;
+    --good:#3fc23f; --serious:#e39169;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#3fae3f;
+    --shadow:0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.55);
+  }
+
+  *{box-sizing:border-box;}
+  body{background:var(--page); color:var(--ink); font-family:"Barlow","Segoe UI",system-ui,-apple-system,sans-serif;}
+  .wrap{max-width:1040px; margin:0 auto; padding-inline:20px;}
+  h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif; font-weight:700; text-wrap:balance; margin:0;}
+  .num{font-variant-numeric:tabular-nums;}
+  a{color:var(--accent);}
+  button{font-family:inherit;}
+  [hidden]{display:none!important;}
+
+  /* header */
+  header.top{
+    position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+    background:color-mix(in oklab, var(--page) 88%, transparent);
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+  }
+  .top-inner{display:flex; align-items:center; gap:12px; padding-block:12px;}
+  .mark{width:34px;height:34px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex:none;}
+  .mark svg{width:19px;height:19px;}
+  .brand{font-size:20px; letter-spacing:.02em; text-transform:uppercase; line-height:1;}
+  .brand small{display:block; font-family:"Barlow",sans-serif; font-weight:500; text-transform:none; letter-spacing:0; font-size:12.5px; color:var(--ink-2); margin-top:3px;}
+  .top-right{margin-left:auto; text-align:right; font-size:12px; color:var(--muted); line-height:1.35;}
+
+  /* hero */
+  .hero{padding-block:28px 8px;}
+  .hero h1{font-size:clamp(30px,5.4vw,44px); line-height:1.02;}
+  .hero p.lede{max-width:60ch; color:var(--ink-2); font-size:16px; line-height:1.55; margin-top:12px;}
+  .hero-meta{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
+  .chip{display:inline-flex; align-items:center; gap:6px; background:var(--accent-soft); color:var(--accent-soft-ink); border-radius:100px; padding:5px 12px; font-size:12.5px; font-weight:600;}
+
+  /* stat strip */
+  .stats{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-block:22px;}
+  @media (max-width:820px){ .stats{grid-template-columns:repeat(2,1fr);} }
+  .stat{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; box-shadow:var(--shadow);}
+  .stat .fuel{font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-2); display:flex; align-items:center; gap:6px;}
+  .stat .fuel .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .stat .price{font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:27px; margin-top:6px;}
+  .stat .delta{font-size:12px; margin-top:3px; font-weight:600; display:flex; align-items:center; gap:4px;}
+  .stat .delta.up{color:var(--serious);} .stat .delta.down{color:var(--good);}
+
+  /* tabs */
+  nav.tabs{display:flex; gap:4px; overflow-x:auto; padding-bottom:2px; margin-top:6px; border-bottom:1px solid var(--border);}
+  nav.tabs button{
+    background:none; border:none; cursor:pointer; white-space:nowrap;
+    font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:16.5px; letter-spacing:.01em;
+    color:var(--ink-2); padding:10px 14px; border-bottom:2.5px solid transparent; margin-bottom:-1px;
+  }
+  nav.tabs button[aria-selected="true"]{color:var(--ink); border-color:var(--accent);}
+  nav.tabs button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  section.panel{padding-block:22px 48px;}
+  .panel h2{font-size:26px;}
+  .panel .sub{color:var(--ink-2); font-size:14.5px; margin-top:4px; max-width:64ch; line-height:1.5;}
+
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow);}
+  .cardpad{padding:16px 18px;}
+
+  /* filter chips */
+  .filters{display:flex; flex-wrap:wrap; gap:7px; margin:16px 0 14px;}
+  .fchip{
+    background:var(--surface); border:1px solid var(--border); color:var(--ink-2);
+    border-radius:100px; padding:6px 13px; font-size:13.5px; font-weight:600; cursor:pointer;
+  }
+  .fchip[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+
+  select{
+    background:var(--surface); color:var(--ink); border:1px solid var(--border); border-radius:9px;
+    padding:8px 12px; font-size:14.5px; font-family:inherit; font-weight:500;
+  }
+  .controls{display:flex; flex-wrap:wrap; gap:10px 16px; align-items:end; margin-bottom:16px;}
+  .field{display:flex; flex-direction:column; gap:4px;}
+  .field label{font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--muted);}
+
+  /* extremos cards */
+  .extgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:6px;}
+  .ext h3{font-size:19px; display:flex; align-items:center; gap:8px;}
+  .ext h3 .dot{width:11px;height:11px;border-radius:3px;}
+  .extrow{padding-top:11px; margin-top:11px; border-top:1px solid var(--border);}
+  .extrow .lbl{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; display:flex; align-items:center; gap:5px;}
+  .extrow.min .lbl{color:var(--good);} .extrow.max .lbl{color:var(--serious);}
+  .extrow .posto{font-weight:600; margin-top:4px; font-size:14.5px;}
+  .extrow .addr{color:var(--muted); font-size:12.5px;}
+  .extrow .pv{display:flex; align-items:baseline; gap:8px; margin-top:4px;}
+  .extrow .pv .v{font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:21px;}
+  .extrow .pv .d{color:var(--muted); font-size:12px;}
+
+  /* table */
+  .tablewrap{overflow-x:auto; border:1px solid var(--border); border-radius:14px; background:var(--surface); box-shadow:var(--shadow);}
+  table{width:100%; border-collapse:collapse; font-size:14px; min-width:560px;}
+  thead th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted);
+    padding:10px 14px; border-bottom:1px solid var(--border); white-space:nowrap; position:sticky; top:0; background:var(--surface);
+  }
+  tbody td{padding:9px 14px; border-bottom:1px solid var(--border); vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
+  tbody tr:hover td{background:var(--surface-2);}
+
+  /* charts */
+  .chartcard{padding:16px 18px 10px;}
+  .charthead{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:6px;}
+  .charthead h3{font-size:17.5px;}
+  .chartwrap{position:relative;}
+  svg.chart{width:100%; height:auto; display:block; overflow:visible;}
+  .legend{display:flex; flex-wrap:wrap; gap:12px; margin-top:8px; padding-top:10px; border-top:1px solid var(--border);}
+  .legend .li{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-2); font-weight:600;}
+  .legend .sw{width:10px;height:10px;border-radius:3px;flex:none;}
+  .tooltip{
+    position:absolute; pointer-events:none; background:var(--ink); color:var(--page);
+    border-radius:8px; padding:8px 10px; font-size:12px; line-height:1.5; box-shadow:var(--shadow);
+    transform:translate(-50%,-108%); white-space:nowrap; opacity:0; transition:opacity .08s; z-index:5;
+  }
+  .tooltip .tt-date{font-weight:700; margin-bottom:2px;}
+  .tooltip .tt-row{display:flex; align-items:center; gap:6px;}
+  .tooltip .tt-sw{width:7px;height:7px;border-radius:50%;flex:none;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:760px){ .grid2{grid-template-columns:1fr;} }
+
+  /* downloads */
+  .dlgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:14px;}
+  .dlcard{padding:15px 16px;}
+  .dlcard h3{font-size:16px;}
+  .dlcard p{font-size:13px; color:var(--ink-2); margin:5px 0 12px; line-height:1.45;}
+  .btn{
+    display:inline-flex; align-items:center; gap:7px; background:var(--accent); color:var(--accent-ink);
+    border:none; border-radius:9px; padding:9px 15px; font-weight:700; font-size:13.5px; cursor:pointer; font-family:"Barlow",sans-serif;
+  }
+  .btn:disabled{opacity:.5; cursor:default;}
+  .btn svg{width:14px;height:14px;}
+  .status{font-size:12px; color:var(--muted); margin-top:8px; min-height:1em;}
+
+  details.rawtable{margin-top:18px;}
+  details.rawtable > summary{cursor:pointer; font-weight:600; font-size:14px; color:var(--accent); margin-bottom:10px;}
+
+  footer{border-top:1px solid var(--border); padding-block:24px 40px; margin-top:8px;}
+  footer p{font-size:12.5px; color:var(--muted); line-height:1.6; max-width:70ch;}
+  footer a{color:var(--ink-2);}
+
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important;} }
+</style>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h12"/><path d="M4 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M14 10h2a2 2 0 0 1 2 2v3.5a1.5 1.5 0 0 0 3 0V9a2 2 0 0 0-.59-1.41L18 6"/></svg></div>
+    <div class="brand">Combustível Colatina<small>preço de posto em Colatina/ES</small></div>
+    <div class="top-right">Dados abertos ANP<br>1º semestre de 2026</div>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <h1>Quanto custa o litro em Colatina?</h1>
+  <p class="lede">Acompanhe e compare o preço da gasolina, gasolina aditivada, etanol, diesel e diesel S10 em 6 postos de Colatina/ES, com base nos boletins que os próprios postos enviam à ANP.</p>
+  <div class="hero-meta">
+    <span class="chip">6 postos</span>
+    <span class="chip">5 bairros</span>
+    <span class="chip">449 coletas de preço</span>
+    <span class="chip">jan – jun / 2026</span>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Seções">
+    <button role="tab" data-tab="extremos" aria-selected="true">Onde é mais barato</button>
+    <button role="tab" data-tab="medias" aria-selected="false">Médias por posto</button>
+    <button role="tab" data-tab="recente" aria-selected="false">Preço atual</button>
+    <button role="tab" data-tab="evolucao" aria-selected="false">Evolução</button>
+    <button role="tab" data-tab="dados" aria-selected="false">Baixar dados</button>
+  </nav>
+</div>
+
+<main class="wrap">
+
+  <section class="panel" id="panel-extremos">
+    <h2>Onde é mais barato — e mais caro</h2>
+    <p class="sub">Para cada combustível, o menor e o maior preço já registrados no semestre, com o posto, o endereço e a data da coleta.</p>
+    <div class="extgrid" id="extgrid"></div>
+  </section>
+
+  <section class="panel" id="panel-medias" hidden>
+    <h2>Preço médio por posto</h2>
+    <p class="sub">Média de todas as coletas do semestre e quantas amostras sustentam essa média, posto a posto.</p>
+    <div class="filters" id="fmedias"></div>
+    <div class="tablewrap"><table id="tmedias"></table></div>
+  </section>
+
+  <section class="panel" id="panel-recente" hidden>
+    <h2>Preço mais recente</h2>
+    <p class="sub">O último valor coletado em cada posto para cada combustível — o retrato mais atual da base.</p>
+    <div class="filters" id="frecente"></div>
+    <div class="tablewrap"><table id="trecente"></table></div>
+  </section>
+
+  <section class="panel" id="panel-evolucao" hidden>
+    <h2>Evolução do preço no tempo</h2>
+    <p class="sub">Escolha um combustível e um posto para ver o preço coleta a coleta ao longo do semestre.</p>
+    <div class="controls">
+      <div class="field"><label for="selFuel">Combustível</label><select id="selFuel"></select></div>
+      <div class="field"><label for="selPosto">Posto</label><select id="selPosto"></select></div>
+    </div>
+    <div class="card chartcard">
+      <div class="charthead"><h3 id="c4title">—</h3></div>
+      <p class="sub" id="c4sub" style="margin-top:-6px;"></p>
+      <div class="chartwrap" id="c4wrap"></div>
+      <div class="tablewrap" id="c4tablewrap" style="margin-top:14px; max-height:220px; overflow-y:auto; box-shadow:none;"><table id="c4table"></table></div>
+    </div>
+
+    <div class="grid2" style="margin-top:18px;">
+      <div class="card chartcard">
+        <div class="charthead"><h3>Preço médio de cada combustível</h3></div>
+        <p class="sub" style="margin-top:-4px;">Média mensal entre os 6 postos.</p>
+        <div class="chartwrap" id="gaWrap"></div>
+      </div>
+      <div class="card chartcard">
+        <div class="charthead"><h3 id="gbTitle">Preço médio por posto</h3></div>
+        <p class="sub" style="margin-top:-4px;">Usa o combustível escolhido acima.</p>
+        <div class="chartwrap" id="gbWrap"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-dados" hidden>
+    <h2>Baixar os dados</h2>
+    <p class="sub">As mesmas informações das quatro consultas acima, em planilhas CSV (abrem direto no Excel ou Google Sheets), para quem quiser conferir, cruzar ou reaproveitar os números.</p>
+    <div class="dlgrid" id="dlgrid"></div>
+    <details class="rawtable">
+      <summary>Ver as 449 coletas em uma tabela</summary>
+      <div class="tablewrap"><table id="traw"></table></div>
+    </details>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <p>
+    Fonte: Agência Nacional do Petróleo, Gás Natural e Biocombustíveis (ANP) — Série Histórica de Preços de Combustíveis Automotivos, 1º semestre de 2026, recorte do município de Colatina/ES.
+    Os preços refletem o que cada posto informou à ANP em cada data de coleta e podem ter mudado desde então.
+    Projeto de extensão da disciplina Arquitetura de Dados Relacionais I — Universidade Vila Velha.
+  </p>
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+const DATA = {"postos":[{"id":0,"nome":"Auto Posto Santa Ana","bairro":"Carlos Germano Naumann","bandeira":"Ale","endereco":"Rodovia do Café, 1871","cnpj":"03.948.877/0003-69"},{"id":1,"nome":"Posto Bruno","bairro":"São Braz","bandeira":"Ale","endereco":"Rua Fioravante Rossi, 738","cnpj":"07.381.843/0001-24"},{"id":2,"nome":"São Francisco de Assis","bairro":"Lace","bandeira":"Vibra","endereco":"Praça Fidélis Ferrari, 35","cnpj":"08.519.545/0001-10"},{"id":3,"nome":"Brax Combustíveis","bairro":"Mário Giurizatto","bandeira":"Ipiranga","endereco":"Rodovia Cônego João Guilherme, 1516","cnpj":"08.971.375/0001-00"},{"id":4,"nome":"Posto Colatina","bairro":"Carlos Germano Naumann","bandeira":null,"endereco":"Rodovia do Café, 606","cnpj":"20.246.670/0001-08"},{"id":5,"nome":"Posto Santo Antônio","bairro":"Santo Antônio","bandeira":"Ale","endereco":"Avenida Sílvio Avidos, 3251","cnpj":"27.085.240/0001-92"}],"fuels":["GASOLINA","GASOLINA ADITIVADA","ETANOL","DIESEL","DIESEL S10"],"rows":[[0,0,"2026-01-08",6.55],[0,1,"2026-01-08",6.75],[0,3,"2026-01-08",5.89],[0,4,"2026-01-08",5.99],[1,0,"2026-01-08",6.55],[1,1,"2026-01-08",6.55],[2,0,"2026-01-08",6.79],[2,1,"2026-01-08",6.89],[3,0,"2026-01-08",6.35],[3,1,"2026-01-08",6.46],[3,2,"2026-01-08",4.69],[3,3,"2026-01-08",6.08],[3,4,"2026-01-08",6.18],[4,0,"2026-01-08",6.49],[4,2,"2026-01-08",4.65],[4,3,"2026-01-08",5.89],[4,4,"2026-01-08",5.99],[0,0,"2026-01-15",6.55],[0,1,"2026-01-15",6.75],[0,3,"2026-01-15",5.89],[0,4,"2026-01-15",5.99],[1,0,"2026-01-15",6.55],[1,1,"2026-01-15",6.55],[2,0,"2026-01-15",6.75],[2,1,"2026-01-15",6.89],[3,0,"2026-01-15",6.37],[3,1,"2026-01-15",6.48],[3,2,"2026-01-15",4.72],[3,3,"2026-01-15",6.08],[3,4,"2026-01-15",6.18],[4,0,"2026-01-15",6.49],[4,2,"2026-01-15",4.75],[4,3,"2026-01-15",5.89],[4,4,"2026-01-15",5.99],[5,0,"2026-01-15",6.59],[5,1,"2026-01-15",6.72],[5,3,"2026-01-15",6.25],[5,4,"2026-01-15",6.35],[4,0,"2026-01-22",6.49],[4,2,"2026-01-22",4.75],[4,3,"2026-01-22",5.89],[4,4,"2026-01-22",5.99],[5,0,"2026-01-22",6.59],[5,1,"2026-01-22",6.72],[5,3,"2026-01-22",6.25],[5,4,"2026-01-22",6.35],[0,0,"2026-01-23",6.49],[0,1,"2026-01-23",6.69],[0,3,"2026-01-23",5.89],[0,4,"2026-01-23",5.99],[3,0,"2026-01-23",6.39],[3,1,"2026-01-23",6.5],[3,2,"2026-01-23",4.85],[3,3,"2026-01-23",6.08],[3,4,"2026-01-23",6.18],[0,0,"2026-01-29",6.49],[0,1,"2026-01-29",6.69],[0,3,"2026-01-29",5.89],[0,4,"2026-01-29",5.99],[1,0,"2026-01-29",6.55],[1,1,"2026-01-29",6.55],[2,0,"2026-01-29",6.79],[2,1,"2026-01-29",6.89],[3,0,"2026-01-29",6.34],[3,1,"2026-01-29",6.45],[3,2,"2026-01-29",4.85],[3,3,"2026-01-29",6.08],[3,4,"2026-01-29",6.18],[4,0,"2026-01-29",6.49],[4,2,"2026-01-29",4.75],[4,3,"2026-01-29",5.89],[4,4,"2026-01-29",5.99],[5,0,"2026-01-29",6.59],[5,1,"2026-01-29",6.72],[5,3,"2026-01-29",6.25],[5,4,"2026-01-29",6.35],[2,0,"2026-02-12",6.79],[2,1,"2026-02-12",6.89],[3,0,"2026-02-12",6.39],[3,1,"2026-02-12",6.5],[3,2,"2026-02-12",4.87],[3,3,"2026-02-12",6.08],[3,4,"2026-02-12",6.18],[4,0,"2026-02-12",6.49],[4,2,"2026-02-12",4.75],[4,3,"2026-02-12",5.89],[4,4,"2026-02-12",5.99],[5,0,"2026-02-12",6.49],[5,1,"2026-02-12",6.62],[5,3,"2026-02-12",6.09],[5,4,"2026-02-12",6.19],[0,0,"2026-02-19",6.49],[0,1,"2026-02-19",6.69],[0,3,"2026-02-19",5.89],[0,4,"2026-02-19",5.99],[1,0,"2026-02-19",6.49],[1,1,"2026-02-19",6.49],[2,0,"2026-02-19",6.79],[2,1,"2026-02-19",6.89],[3,0,"2026-02-19",6.39],[3,1,"2026-02-19",6.5],[3,2,"2026-02-19",4.87],[3,3,"2026-02-19",6.08],[3,4,"2026-02-19",6.18],[0,0,"2026-02-26",6.49],[0,1,"2026-02-26",6.69],[0,3,"2026-02-26",5.89],[0,4,"2026-02-26",5.99],[1,0,"2026-02-26",6.49],[1,1,"2026-02-26",6.49],[2,0,"2026-02-26",6.79],[2,1,"2026-02-26",6.89],[3,0,"2026-02-26",6.39],[3,1,"2026-02-26",6.5],[3,2,"2026-02-26",4.87],[3,3,"2026-02-26",6.11],[3,4,"2026-02-26",6.21],[4,0,"2026-02-26",6.49],[4,2,"2026-02-26",4.59],[4,3,"2026-02-26",5.89],[4,4,"2026-02-26",5.99],[5,0,"2026-02-26",6.49],[5,1,"2026-02-26",6.62],[5,3,"2026-02-26",6.09],[5,4,"2026-02-26",6.19],[0,0,"2026-03-03",6.49],[0,1,"2026-03-03",6.69],[0,3,"2026-03-03",5.89],[0,4,"2026-03-03",5.99],[1,0,"2026-03-03",6.49],[1,1,"2026-03-03",6.49],[2,0,"2026-03-03",6.79],[2,1,"2026-03-03",6.89],[3,0,"2026-03-03",6.3],[3,1,"2026-03-03",6.5],[3,2,"2026-03-03",4.87],[3,3,"2026-03-03",6.11],[3,4,"2026-03-03",6.11],[4,0,"2026-03-03",6.49],[4,2,"2026-03-03",4.59],[4,3,"2026-03-03",5.89],[4,4,"2026-03-03",5.99],[5,0,"2026-03-03",6.49],[5,1,"2026-03-03",6.62],[5,3,"2026-03-03",6.09],[5,4,"2026-03-03",6.19],[0,0,"2026-03-12",6.45],[0,1,"2026-03-12",6.65],[0,3,"2026-03-12",6.49],[0,4,"2026-03-12",6.59],[1,0,"2026-03-12",6.59],[1,1,"2026-03-12",6.59],[2,0,"2026-03-12",6.79],[2,1,"2026-03-12",6.89],[3,0,"2026-03-12",6.47],[3,1,"2026-03-12",6.58],[3,2,"2026-03-12",4.87],[3,3,"2026-03-12",6.4],[3,4,"2026-03-12",6.5],[4,0,"2026-03-12",6.45],[4,2,"2026-03-12",4.65],[4,3,"2026-03-12",7.69],[4,4,"2026-03-12",7.89],[5,0,"2026-03-12",6.49],[5,1,"2026-03-12",6.62],[5,3,"2026-03-12",6.39],[5,4,"2026-03-12",6.49],[0,0,"2026-03-16",6.45],[0,1,"2026-03-16",6.65],[0,3,"2026-03-16",6.49],[0,4,"2026-03-16",6.59],[1,0,"2026-03-16",6.59],[1,1,"2026-03-16",6.59],[2,0,"2026-03-16",6.79],[2,1,"2026-03-16",6.89],[3,0,"2026-03-16",6.52],[3,1,"2026-03-16",6.63],[3,2,"2026-03-16",4.99],[3,3,"2026-03-16",6.47],[3,4,"2026-03-16",6.57],[4,0,"2026-03-16",6.49],[4,2,"2026-03-16",4.59],[5,0,"2026-03-16",6.49],[5,1,"2026-03-16",6.62],[5,3,"2026-03-16",6.49],[5,4,"2026-03-16",6.59],[0,0,"2026-03-26",6.55],[0,1,"2026-03-26",6.75],[0,3,"2026-03-26",6.89],[0,4,"2026-03-26",6.99],[1,0,"2026-03-26",6.69],[1,1,"2026-03-26",6.69],[2,0,"2026-03-26",6.89],[2,1,"2026-03-26",6.99],[3,0,"2026-03-26",6.49],[3,1,"2026-03-26",6.69],[3,2,"2026-03-26",5.07],[3,3,"2026-03-26",6.63],[3,4,"2026-03-26",6.93],[4,0,"2026-03-26",6.55],[4,2,"2026-03-26",4.59],[4,3,"2026-03-26",7.59],[4,4,"2026-03-26",7.69],[5,0,"2026-03-26",6.79],[5,1,"2026-03-26",6.92],[5,3,"2026-03-26",6.89],[5,4,"2026-03-26",6.99],[0,0,"2026-04-02",6.55],[0,1,"2026-04-02",6.75],[0,3,"2026-04-02",6.89],[0,4,"2026-04-02",6.99],[1,0,"2026-04-02",6.69],[1,1,"2026-04-02",6.69],[2,0,"2026-04-02",6.89],[2,1,"2026-04-02",6.99],[3,0,"2026-04-02",6.49],[3,1,"2026-04-02",6.69],[3,2,"2026-04-02",5.09],[3,3,"2026-04-02",6.69],[3,4,"2026-04-02",6.93],[5,0,"2026-04-02",6.79],[5,1,"2026-04-02",6.92],[5,3,"2026-04-02",6.89],[5,4,"2026-04-02",6.99],[0,0,"2026-04-06",6.55],[0,1,"2026-04-06",6.75],[0,3,"2026-04-06",6.89],[0,4,"2026-04-06",6.99],[1,0,"2026-04-06",6.69],[1,1,"2026-04-06",6.69],[2,0,"2026-04-06",6.99],[2,1,"2026-04-06",7.09],[4,0,"2026-04-06",6.55],[4,2,"2026-04-06",4.69],[4,3,"2026-04-06",6.99],[4,4,"2026-04-06",7.29],[5,0,"2026-04-06",6.79],[5,1,"2026-04-06",6.92],[5,3,"2026-04-06",6.89],[5,4,"2026-04-06",6.99],[1,0,"2026-04-16",6.69],[1,1,"2026-04-16",6.69],[2,0,"2026-04-16",6.99],[2,1,"2026-04-16",7.09],[3,0,"2026-04-16",6.59],[3,1,"2026-04-16",6.79],[3,2,"2026-04-16",5.09],[3,3,"2026-04-16",6.79],[3,4,"2026-04-16",6.98],[4,0,"2026-04-16",6.55],[4,2,"2026-04-16",4.69],[4,3,"2026-04-16",6.89],[4,4,"2026-04-16",6.99],[5,0,"2026-04-16",6.79],[5,1,"2026-04-16",6.92],[5,3,"2026-04-16",6.89],[5,4,"2026-04-16",6.99],[0,0,"2026-04-21",6.55],[0,1,"2026-04-21",6.75],[0,3,"2026-04-21",6.89],[0,4,"2026-04-21",6.99],[1,0,"2026-04-21",6.69],[1,1,"2026-04-21",6.69],[2,0,"2026-04-21",6.99],[2,1,"2026-04-21",7.09],[3,0,"2026-04-21",6.59],[3,1,"2026-04-21",6.79],[3,2,"2026-04-21",5.09],[3,3,"2026-04-21",6.79],[3,4,"2026-04-21",6.98],[4,0,"2026-04-21",6.55],[4,2,"2026-04-21",4.69],[4,3,"2026-04-21",6.89],[4,4,"2026-04-21",6.99],[5,0,"2026-04-21",6.79],[5,1,"2026-04-21",6.92],[5,3,"2026-04-21",6.89],[5,4,"2026-04-21",6.99],[0,0,"2026-04-30",6.55],[0,1,"2026-04-30",6.75],[0,3,"2026-04-30",6.89],[0,4,"2026-04-30",6.99],[1,0,"2026-04-30",6.69],[1,1,"2026-04-30",6.69],[2,0,"2026-04-30",6.89],[2,1,"2026-04-30",6.99],[3,0,"2026-04-30",6.64],[3,1,"2026-04-30",6.79],[3,2,"2026-04-30",5.14],[3,3,"2026-04-30",6.78],[3,4,"2026-04-30",6.88],[4,0,"2026-04-30",6.55],[4,2,"2026-04-30",4.69],[4,3,"2026-04-30",6.89],[4,4,"2026-04-30",6.99],[5,0,"2026-04-30",6.79],[5,1,"2026-04-30",6.92],[5,3,"2026-04-30",6.89],[5,4,"2026-04-30",6.99],[0,0,"2026-05-07",6.55],[0,1,"2026-05-07",6.75],[0,3,"2026-05-07",6.89],[0,4,"2026-05-07",6.99],[1,0,"2026-05-07",6.69],[1,1,"2026-05-07",6.69],[2,0,"2026-05-07",6.89],[2,1,"2026-05-07",6.99],[3,0,"2026-05-07",6.64],[3,1,"2026-05-07",6.79],[3,2,"2026-05-07",5.14],[3,3,"2026-05-07",6.78],[3,4,"2026-05-07",6.88],[4,0,"2026-05-07",6.55],[4,2,"2026-05-07",4.69],[4,3,"2026-05-07",6.89],[4,4,"2026-05-07",6.99],[5,0,"2026-05-07",6.69],[5,1,"2026-05-07",6.79],[5,3,"2026-05-07",6.89],[5,4,"2026-05-07",6.99],[0,0,"2026-05-12",6.55],[0,1,"2026-05-12",6.75],[0,3,"2026-05-12",6.89],[0,4,"2026-05-12",6.99],[1,0,"2026-05-12",6.69],[1,1,"2026-05-12",6.69],[2,0,"2026-05-12",6.89],[2,1,"2026-05-12",6.99],[3,0,"2026-05-12",6.69],[3,1,"2026-05-12",6.79],[3,2,"2026-05-12",5.19],[3,3,"2026-05-12",6.78],[3,4,"2026-05-12",6.88],[4,0,"2026-05-12",6.55],[4,2,"2026-05-12",4.69],[4,3,"2026-05-12",6.89],[4,4,"2026-05-12",6.99],[5,0,"2026-05-12",6.69],[5,1,"2026-05-12",6.79],[5,3,"2026-05-12",6.89],[5,4,"2026-05-12",6.99],[0,0,"2026-05-21",6.55],[0,1,"2026-05-21",6.75],[0,3,"2026-05-21",6.89],[0,4,"2026-05-21",6.99],[1,0,"2026-05-21",6.59],[1,1,"2026-05-21",6.59],[2,0,"2026-05-21",6.98],[2,1,"2026-05-21",6.99],[3,0,"2026-05-21",6.63],[3,1,"2026-05-21",6.79],[3,2,"2026-05-21",4.99],[3,3,"2026-05-21",6.78],[3,4,"2026-05-21",6.84],[4,0,"2026-05-21",6.55],[4,2,"2026-05-21",4.69],[4,3,"2026-05-21",6.89],[4,4,"2026-05-21",6.99],[5,0,"2026-05-21",6.69],[5,1,"2026-05-21",6.79],[5,3,"2026-05-21",6.89],[5,4,"2026-05-21",6.99],[0,0,"2026-05-27",6.55],[0,1,"2026-05-27",6.75],[0,3,"2026-05-27",6.89],[0,4,"2026-05-27",6.99],[2,0,"2026-05-27",6.89],[2,1,"2026-05-27",6.99],[5,0,"2026-05-27",6.69],[5,1,"2026-05-27",6.79],[5,3,"2026-05-27",6.89],[5,4,"2026-05-27",6.99],[0,0,"2026-06-04",6.55],[0,1,"2026-06-04",6.75],[0,3,"2026-06-04",6.89],[0,4,"2026-06-04",6.99],[1,0,"2026-06-04",6.69],[1,1,"2026-06-04",6.69],[2,0,"2026-06-04",6.89],[2,1,"2026-06-04",6.99],[3,0,"2026-06-04",6.63],[3,1,"2026-06-04",6.79],[3,2,"2026-06-04",4.98],[3,3,"2026-06-04",6.78],[3,4,"2026-06-04",6.84],[4,0,"2026-06-04",6.55],[4,2,"2026-06-04",4.69],[4,3,"2026-06-04",6.89],[4,4,"2026-06-04",6.99],[5,0,"2026-06-04",6.69],[5,1,"2026-06-04",6.79],[5,3,"2026-06-04",6.89],[5,4,"2026-06-04",6.99],[0,0,"2026-06-10",6.55],[0,1,"2026-06-10",6.75],[0,3,"2026-06-10",6.89],[0,4,"2026-06-10",6.99],[1,0,"2026-06-10",6.69],[1,1,"2026-06-10",6.69],[2,0,"2026-06-10",6.89],[2,1,"2026-06-10",6.99],[3,0,"2026-06-10",6.63],[3,1,"2026-06-10",6.79],[3,2,"2026-06-10",4.98],[3,3,"2026-06-10",6.78],[3,4,"2026-06-10",6.84],[4,0,"2026-06-10",6.55],[4,2,"2026-06-10",4.69],[4,3,"2026-06-10",6.89],[4,4,"2026-06-10",6.99],[5,0,"2026-06-10",6.69],[5,1,"2026-06-10",6.79],[5,3,"2026-06-10",6.89],[5,4,"2026-06-10",6.99],[0,0,"2026-06-17",6.55],[0,1,"2026-06-17",6.75],[0,3,"2026-06-17",6.89],[0,4,"2026-06-17",6.99],[2,0,"2026-06-17",6.89],[2,1,"2026-06-17",6.99],[4,0,"2026-06-17",6.65],[4,2,"2026-06-17",4.69],[4,3,"2026-06-17",6.89],[4,4,"2026-06-17",6.99],[5,0,"2026-06-17",6.69],[5,1,"2026-06-17",6.79],[5,3,"2026-06-17",6.89],[5,4,"2026-06-17",6.99],[0,0,"2026-06-25",6.55],[0,1,"2026-06-25",6.75],[0,3,"2026-06-25",6.89],[0,4,"2026-06-25",6.99],[1,0,"2026-06-25",6.69],[1,1,"2026-06-25",6.69],[2,0,"2026-06-25",6.89],[2,1,"2026-06-25",6.99],[3,0,"2026-06-25",6.63],[3,1,"2026-06-25",6.77],[3,2,"2026-06-25",4.98],[3,3,"2026-06-25",6.78],[3,4,"2026-06-25",6.84],[4,0,"2026-06-25",6.65],[4,2,"2026-06-25",4.69],[4,3,"2026-06-25",6.89],[4,4,"2026-06-25",6.99],[5,0,"2026-06-25",6.69],[5,1,"2026-06-25",6.79],[5,3,"2026-06-25",6.89],[5,4,"2026-06-25",6.99]]};
+
+const FUEL_LABEL = {0:"Gasolina",1:"Gasolina aditivada",2:"Etanol",3:"Diesel",4:"Diesel S10"};
+const FUEL_COLOR = ["var(--s1)","var(--s2)","var(--s3)","var(--s4)","var(--s5)"];
+const POSTO_COLOR = ["var(--s1)","var(--s2)","var(--s3)","var(--s4)","var(--s5)","var(--s6)"];
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v.replace('var(','').replace(')','')).trim() || v; }
+function fuelColor(f){ return css(FUEL_COLOR[f]); }
+function postoColor(p){ return css(POSTO_COLOR[p]); }
+
+function money(v){ return "R$ " + v.toFixed(2).replace(".", ","); }
+function moneyPrecise(v){ return "R$ " + v.toFixed(3).replace(".", ","); }
+function dateBR(iso){ const [y,m,d]=iso.split("-"); return d+"/"+m; }
+function dateBRfull(iso){ const [y,m,d]=iso.split("-"); return d+"/"+m+"/"+y; }
+function monthLabel(m){ const names=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"]; return names[+m.slice(5,7)-1]+"/"+m.slice(2,4); }
+
+/* ---------- derived data ---------- */
+function computeExtremos(){
+  const byFuel = {};
+  for(const [p,f,d,v] of DATA.rows){ (byFuel[f]=byFuel[f]||[]).push({p,d,v}); }
+  return DATA.fuels.map((_,f)=>{
+    const arr = byFuel[f]||[];
+    const min = [...arr].sort((a,b)=>a.v-b.v || a.d.localeCompare(b.d))[0];
+    const max = [...arr].sort((a,b)=>b.v-a.v || a.d.localeCompare(b.d))[0];
+    return {f, min, max};
+  });
+}
+function computeMedias(){
+  const map = {};
+  for(const [p,f,,v] of DATA.rows){
+    const k=p+"_"+f;
+    (map[k]=map[k]||{p,f,sum:0,n:0}); map[k].sum+=v; map[k].n++;
+  }
+  return Object.values(map).map(o=>({p:o.p,f:o.f,avg:o.sum/o.n,n:o.n}));
+}
+function computeRecentes(){
+  const map = {};
+  for(const [p,f,d,v] of DATA.rows){
+    const k=p+"_"+f;
+    if(!map[k] || d>map[k].d) map[k]={p,f,d,v};
+  }
+  return Object.values(map);
+}
+function computeEvolucao(p,f){
+  return DATA.rows.filter(r=>r[0]===p && r[1]===f).map(r=>({d:r[2],v:r[3]})).sort((a,b)=>a.d.localeCompare(b.d));
+}
+function allMonths(rows){ return [...new Set(rows.map(r=>r[2].slice(0,7)))].sort(); }
+function computeMonthlyByFuel(){
+  const months = allMonths(DATA.rows);
+  const series = DATA.fuels.map((_,f)=>{
+    const values = months.map(m=>{
+      const sub = DATA.rows.filter(r=>r[1]===f && r[2].slice(0,7)===m);
+      return sub.length ? sub.reduce((a,r)=>a+r[3],0)/sub.length : null;
+    });
+    return {name:FUEL_LABEL[f], color:fuelColor(f), values};
+  });
+  return {months, series};
+}
+function computeMonthlyByPosto(f){
+  const rowsF = DATA.rows.filter(r=>r[1]===f);
+  const months = allMonths(rowsF);
+  const series = DATA.postos.map((posto,p)=>{
+    const values = months.map(m=>{
+      const sub = rowsF.filter(r=>r[0]===p && r[2].slice(0,7)===m);
+      return sub.length ? sub.reduce((a,r)=>a+r[3],0)/sub.length : null;
+    });
+    return {name:posto.nome, color:postoColor(p), values};
+  }).filter(s=>s.values.some(v=>v!=null));
+  return {months, series};
+}
+
+/* ---------- hero stats ---------- */
+function renderStats(){
+  const rec = computeRecentes();
+  const monthly = computeMonthlyByFuel();
+  const janIdx = monthly.months.indexOf("2026-01");
+  const el = document.getElementById("stats");
+  el.innerHTML = DATA.fuels.map((_,f)=>{
+    const rs = rec.filter(r=>r.f===f);
+    if(!rs.length) return "";
+    const avgNow = rs.reduce((a,r)=>a+r.v,0)/rs.length;
+    const jan = janIdx>=0 ? monthly.series[f].values[janIdx] : null;
+    let deltaHtml = "";
+    if(jan!=null){
+      const pct = (avgNow-jan)/jan*100;
+      const up = pct>0.05, down = pct<-0.05;
+      const arrow = up ? "▲" : down ? "▼" : "•";
+      const cls = up ? "up" : down ? "down" : "";
+      deltaHtml = '<div class="delta '+cls+'">'+arrow+' '+Math.abs(pct).toFixed(1)+'% desde jan.</div>';
+    }
+    return '<div class="stat"><div class="fuel"><span class="dot" style="background:'+fuelColor(f)+'"></span>'+FUEL_LABEL[f]+'</div>'+
+      '<div class="price num">'+money(avgNow)+'</div>'+deltaHtml+'</div>';
+  }).join("");
+}
+
+/* ---------- extremos ---------- */
+function renderExtremos(){
+  const data = computeExtremos();
+  const el = document.getElementById("extgrid");
+  el.innerHTML = data.map(({f,min,max})=>{
+    const pMin = DATA.postos[min.p], pMax = DATA.postos[max.p];
+    return '<div class="card cardpad ext"><h3><span class="dot" style="background:'+fuelColor(f)+'"></span>'+FUEL_LABEL[f]+'</h3>'+
+      '<div class="extrow min"><div class="lbl">▼ mais barato</div><div class="posto">'+pMin.nome+'</div>'+
+      '<div class="addr">'+pMin.endereco+' · '+pMin.bairro+'</div>'+
+      '<div class="pv"><span class="v num">'+money(min.v)+'</span><span class="d">'+dateBRfull(min.d)+'</span></div></div>'+
+      '<div class="extrow max"><div class="lbl">▲ mais caro</div><div class="posto">'+pMax.nome+'</div>'+
+      '<div class="addr">'+pMax.endereco+' · '+pMax.bairro+'</div>'+
+      '<div class="pv"><span class="v num">'+money(max.v)+'</span><span class="d">'+dateBRfull(max.d)+'</span></div></div>'+
+      '</div>';
+  }).join("");
+}
+
+/* ---------- filter chips helper ---------- */
+function renderChips(container, onChange){
+  const opts = [{f:null,label:"Todos"}].concat(DATA.fuels.map((_,f)=>({f,label:FUEL_LABEL[f]})));
+  container.innerHTML = opts.map((o,i)=>'<button class="fchip" data-f="'+o.f+'" aria-pressed="'+(i===0)+'">'+o.label+'</button>').join("");
+  let current = null;
+  container.querySelectorAll(".fchip").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      container.querySelectorAll(".fchip").forEach(b=>b.setAttribute("aria-pressed","false"));
+      btn.setAttribute("aria-pressed","true");
+      current = btn.dataset.f === "null" ? null : +btn.dataset.f;
+      onChange(current);
+    });
+  });
+}
+
+/* ---------- medias table ---------- */
+function renderMedias(filterF){
+  const data = computeMedias().filter(r=> filterF==null || r.f===filterF)
+    .sort((a,b)=> DATA.postos[a.p].nome.localeCompare(DATA.postos[b.p].nome) || a.f-b.f);
+  const t = document.getElementById("tmedias");
+  t.innerHTML = "<thead><tr><th>Posto</th><th>Bairro</th><th>Combustível</th><th class='num'>Preço médio</th><th class='num'>Amostras</th></tr></thead>"+
+    "<tbody>"+data.map(r=>{
+      const p = DATA.postos[r.p];
+      return "<tr><td>"+p.nome+"</td><td>"+p.bairro+"</td><td>"+FUEL_LABEL[r.f]+"</td><td class='num'>"+moneyPrecise(r.avg)+"</td><td class='num'>"+r.n+"</td></tr>";
+    }).join("")+"</tbody>";
+}
+
+/* ---------- recentes table ---------- */
+function renderRecente(filterF){
+  const data = computeRecentes().filter(r=> filterF==null || r.f===filterF)
+    .sort((a,b)=> filterF==null ? (DATA.postos[a.p].nome.localeCompare(DATA.postos[b.p].nome)||a.f-b.f) : a.v-b.v);
+  const t = document.getElementById("trecente");
+  t.innerHTML = "<thead><tr><th>Posto</th><th>Bairro</th><th>Combustível</th><th class='num'>Valor</th><th>Data</th></tr></thead>"+
+    "<tbody>"+data.map(r=>{
+      const p = DATA.postos[r.p];
+      return "<tr><td>"+p.nome+"</td><td>"+p.bairro+"</td><td>"+FUEL_LABEL[r.f]+"</td><td class='num'>"+money(r.v)+"</td><td>"+dateBRfull(r.d)+"</td></tr>";
+    }).join("")+"</tbody>";
+}
+
+/* ---------- line chart (SVG) ---------- */
+function lineChart(container, categories, series, opts){
+  opts = opts || {};
+  const W = 640, H = opts.height || 260;
+  const padL = 46, padR = 14, padT = 14, padB = 26;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+
+  container.innerHTML = "";
+  const wrapDiv = document.createElement("div");
+  wrapDiv.className = "chartwrap-inner";
+  const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  svg.setAttribute("class","chart");
+  const tooltip = document.createElement("div");
+  tooltip.className = "tooltip";
+  container.appendChild(svg);
+  container.appendChild(tooltip);
+
+  const allVals = series.flatMap(s=>s.values).filter(v=>v!=null);
+  if(!allVals.length){ container.innerHTML = "<p class='sub'>Sem dados suficientes.</p>"; return; }
+  let yMin = Math.min(...allVals), yMax = Math.max(...allVals);
+  const range = (yMax-yMin) || (yMax*0.1) || 1;
+  yMin = Math.max(0, yMin - range*0.18);
+  yMax = yMax + range*0.18;
+
+  const n = categories.length;
+  const xAt = i => n<=1 ? padL+plotW/2 : padL + i*(plotW/(n-1));
+  const yAt = v => padT + (yMax-v)/(yMax-yMin)*plotH;
+
+  const ns = "http://www.w3.org/2000/svg";
+  const g = document.createElementNS(ns,"g");
+
+  // gridlines + y labels
+  const ticks = 4;
+  for(let t=0;t<=ticks;t++){
+    const v = yMin + (yMax-yMin)*t/ticks;
+    const y = yAt(v);
+    const line = document.createElementNS(ns,"line");
+    line.setAttribute("x1",padL); line.setAttribute("x2",W-padR);
+    line.setAttribute("y1",y); line.setAttribute("y2",y);
+    line.setAttribute("stroke", css("var(--grid)")); line.setAttribute("stroke-width","1");
+    g.appendChild(line);
+    const txt = document.createElementNS(ns,"text");
+    txt.setAttribute("x",padL-8); txt.setAttribute("y",y+3.5); txt.setAttribute("text-anchor","end");
+    txt.setAttribute("font-size","10"); txt.setAttribute("fill",css("var(--muted)"));
+    txt.textContent = money(v);
+    g.appendChild(txt);
+  }
+  // x labels
+  const step = Math.max(1, Math.ceil(n/6));
+  for(let i=0;i<n;i+=step){
+    const txt = document.createElementNS(ns,"text");
+    txt.setAttribute("x",xAt(i)); txt.setAttribute("y",H-8); txt.setAttribute("text-anchor","middle");
+    txt.setAttribute("font-size","10"); txt.setAttribute("fill",css("var(--muted)"));
+    txt.textContent = opts.xLabel ? opts.xLabel(categories[i]) : categories[i];
+    g.appendChild(txt);
+  }
+  if((n-1)%step!==0){
+    const i=n-1;
+    const txt = document.createElementNS(ns,"text");
+    txt.setAttribute("x",xAt(i)); txt.setAttribute("y",H-8); txt.setAttribute("text-anchor","end");
+    txt.setAttribute("font-size","10"); txt.setAttribute("fill",css("var(--muted)"));
+    txt.textContent = opts.xLabel ? opts.xLabel(categories[i]) : categories[i];
+    g.appendChild(txt);
+  }
+
+  // series paths + points
+  const pointGroups = [];
+  series.forEach(s=>{
+    let d = ""; let open=false;
+    const pts = [];
+    s.values.forEach((v,i)=>{
+      if(v==null){ open=false; return; }
+      const x=xAt(i), y=yAt(v);
+      d += (open?"L":"M")+x.toFixed(2)+","+y.toFixed(2)+" ";
+      open = true;
+      pts.push({i,x,y,v});
+    });
+    const path = document.createElementNS(ns,"path");
+    path.setAttribute("d",d.trim());
+    path.setAttribute("fill","none");
+    path.setAttribute("stroke",s.color);
+    path.setAttribute("stroke-width","2");
+    path.setAttribute("stroke-linecap","round");
+    path.setAttribute("stroke-linejoin","round");
+    g.appendChild(path);
+    pts.forEach((pt,idx)=>{
+      const c = document.createElementNS(ns,"circle");
+      c.setAttribute("cx",pt.x); c.setAttribute("cy",pt.y); c.setAttribute("r", n>1?3:4);
+      c.setAttribute("fill", css("var(--surface)")); c.setAttribute("stroke",s.color); c.setAttribute("stroke-width","2");
+      g.appendChild(c);
+      if(idx===pts.length-1 && opts.endLabels!==false && series.length<=4){
+        const lbl = document.createElementNS(ns,"text");
+        lbl.setAttribute("x", Math.min(pt.x+6, W-padR-2)); lbl.setAttribute("y", pt.y+3.5);
+        lbl.setAttribute("font-size","10"); lbl.setAttribute("font-weight","700"); lbl.setAttribute("fill",s.color);
+        if(pt.x > W-padR-60) lbl.setAttribute("text-anchor","end"), lbl.setAttribute("x", pt.x-6);
+        lbl.textContent = s.name;
+        g.appendChild(lbl);
+      }
+    });
+    pointGroups.push(pts);
+  });
+
+  // crosshair
+  const crosshair = document.createElementNS(ns,"line");
+  crosshair.setAttribute("y1",padT); crosshair.setAttribute("y2",H-padB);
+  crosshair.setAttribute("stroke",css("var(--baseline)")); crosshair.setAttribute("stroke-width","1");
+  crosshair.setAttribute("opacity","0");
+  g.appendChild(crosshair);
+
+  svg.appendChild(g);
+
+  const overlay = document.createElementNS(ns,"rect");
+  overlay.setAttribute("x",padL); overlay.setAttribute("y",padT);
+  overlay.setAttribute("width",plotW); overlay.setAttribute("height",plotH);
+  overlay.setAttribute("fill","transparent");
+  svg.appendChild(overlay);
+
+  function showAt(i){
+    const x = xAt(i);
+    crosshair.setAttribute("x1",x); crosshair.setAttribute("x2",x); crosshair.setAttribute("opacity","1");
+    let rowsHtml = "";
+    series.forEach((s,si)=>{
+      const v = s.values[i];
+      if(v==null) return;
+      rowsHtml += '<div class="tt-row"><span class="tt-sw" style="background:'+s.color+'"></span>'+s.name+': <b class="num">'+moneyPrecise(v)+'</b></div>';
+    });
+    const dateTxt = opts.xLabel ? opts.xLabel(categories[i]) : categories[i];
+    tooltip.innerHTML = '<div class="tt-date">'+dateTxt+'</div>'+rowsHtml;
+    tooltip.style.opacity = "1";
+    const rect = svg.getBoundingClientRect();
+    const px = (x/W)*rect.width;
+    const py = (padT/H)*rect.height;
+    tooltip.style.left = px+"px";
+    tooltip.style.top = Math.max(py,10)+"px";
+  }
+  function hide(){ crosshair.setAttribute("opacity","0"); tooltip.style.opacity="0"; }
+
+  overlay.addEventListener("mousemove", e=>{
+    const rect = svg.getBoundingClientRect();
+    const relX = (e.clientX-rect.left)/rect.width*W;
+    let idx = 0, best = Infinity;
+    for(let i=0;i<n;i++){ const dx=Math.abs(xAt(i)-relX); if(dx<best){best=dx; idx=i;} }
+    showAt(idx);
+  });
+  overlay.addEventListener("mouseleave", hide);
+  overlay.addEventListener("touchstart", e=>{
+    const t=e.touches[0]; const rect=svg.getBoundingClientRect();
+    const relX=(t.clientX-rect.left)/rect.width*W;
+    let idx=0, best=Infinity;
+    for(let i=0;i<n;i++){ const dx=Math.abs(xAt(i)-relX); if(dx<best){best=dx; idx=i;} }
+    showAt(idx);
+  },{passive:true});
+  overlay.addEventListener("touchmove", e=>{
+    const t=e.touches[0]; const rect=svg.getBoundingClientRect();
+    const relX=(t.clientX-rect.left)/rect.width*W;
+    let idx=0, best=Infinity;
+    for(let i=0;i<n;i++){ const dx=Math.abs(xAt(i)-relX); if(dx<best){best=dx; idx=i;} }
+    showAt(idx);
+  },{passive:true});
+
+  // legend
+  if(series.length>1 || opts.forceLegend){
+    const legend = document.createElement("div");
+    legend.className = "legend";
+    legend.innerHTML = series.map(s=>'<span class="li"><span class="sw" style="background:'+s.color+'"></span>'+s.name+'</span>').join("");
+    container.appendChild(legend);
+  }
+}
+
+/* ---------- evolucao tab ---------- */
+function populateEvolucaoControls(){
+  const selFuel = document.getElementById("selFuel");
+  selFuel.innerHTML = DATA.fuels.map((_,f)=>'<option value="'+f+'">'+FUEL_LABEL[f]+'</option>').join("");
+  const selPosto = document.getElementById("selPosto");
+  function refreshPostoOptions(){
+    const f = +selFuel.value;
+    const validPostos = DATA.postos.filter(p=> DATA.rows.some(r=>r[0]===p.id && r[1]===f));
+    selPosto.innerHTML = validPostos.map(p=>'<option value="'+p.id+'">'+p.nome+'</option>').join("");
+  }
+  refreshPostoOptions();
+  function update(){
+    const f = +selFuel.value, p = +selPosto.value;
+    renderConsulta4(p,f);
+    renderGraficoB(f);
+  }
+  selFuel.addEventListener("change", ()=>{ refreshPostoOptions(); update(); });
+  selPosto.addEventListener("change", update);
+  update();
+  renderGraficoA();
+}
+function renderConsulta4(p,f){
+  const posto = DATA.postos[p];
+  document.getElementById("c4title").textContent = FUEL_LABEL[f] + " — " + posto.nome;
+  document.getElementById("c4sub").textContent = posto.bairro + " · " + posto.endereco;
+  const data = computeEvolucao(p,f);
+  const cats = data.map(r=>r.d);
+  lineChart(document.getElementById("c4wrap"), cats, [{name:FUEL_LABEL[f], color:fuelColor(f), values:data.map(r=>r.v)}],
+    {xLabel: dateBR, forceLegend:false, endLabels:false});
+  const t = document.getElementById("c4table");
+  t.innerHTML = "<thead><tr><th>Data</th><th class='num'>Valor</th></tr></thead><tbody>"+
+    data.map(r=>"<tr><td>"+dateBRfull(r.d)+"</td><td class='num'>"+money(r.v)+"</td></tr>").join("")+"</tbody>";
+}
+function renderGraficoA(){
+  const {months, series} = computeMonthlyByFuel();
+  lineChart(document.getElementById("gaWrap"), months, series, {xLabel: monthLabel});
+}
+function renderGraficoB(f){
+  document.getElementById("gbTitle").textContent = FUEL_LABEL[f] + " — preço médio por posto";
+  const {months, series} = computeMonthlyByPosto(f);
+  lineChart(document.getElementById("gbWrap"), months, series, {xLabel: monthLabel});
+}
+
+/* ---------- downloads ---------- */
+function toCSV(headers, rows){
+  const esc = v => { v = v==null?"":String(v); return /[;"\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+  return "﻿"+[headers.join(";"), ...rows.map(r=>r.map(esc).join(";"))].join("\r\n");
+}
+function csvExtremos(){
+  const rows = computeExtremos().flatMap(({f,min,max})=>{
+    const pMin=DATA.postos[min.p], pMax=DATA.postos[max.p];
+    return [
+      [FUEL_LABEL[f],"Menor",pMin.nome,pMin.endereco,pMin.bairro,min.v.toFixed(3).replace(".",","),dateBRfull(min.d)],
+      [FUEL_LABEL[f],"Maior",pMax.nome,pMax.endereco,pMax.bairro,max.v.toFixed(3).replace(".",","),dateBRfull(max.d)],
+    ];
+  });
+  return toCSV(["combustivel","extremo","posto","endereco","bairro","valor","data"], rows);
+}
+function csvMedias(){
+  const rows = computeMedias().sort((a,b)=>DATA.postos[a.p].nome.localeCompare(DATA.postos[b.p].nome)||a.f-b.f)
+    .map(r=>{ const p=DATA.postos[r.p]; return [p.nome,p.bairro,FUEL_LABEL[r.f],r.avg.toFixed(3).replace(".",","),r.n]; });
+  return toCSV(["posto","bairro","combustivel","preco_medio","qtd_amostras"], rows);
+}
+function csvRecentes(){
+  const rows = computeRecentes().sort((a,b)=>DATA.postos[a.p].nome.localeCompare(DATA.postos[b.p].nome)||a.f-b.f)
+    .map(r=>{ const p=DATA.postos[r.p]; return [p.nome,p.bairro,FUEL_LABEL[r.f],r.v.toFixed(3).replace(".",","),dateBRfull(r.d)]; });
+  return toCSV(["posto","bairro","combustivel","valor","data"], rows);
+}
+function csvCompleto(){
+  const rows = DATA.rows.map(([p,f,d,v])=>{ const posto=DATA.postos[p]; return [posto.nome,posto.bairro,FUEL_LABEL[f],v.toFixed(3).replace(".",","),dateBRfull(d)]; })
+    .sort((a,b)=> a[0].localeCompare(b[0]) || a[2].localeCompare(b[2]));
+  return toCSV(["posto","bairro","combustivel","valor","data"], rows);
+}
+
+let downloadsCap = null;
+const inClaudeHost = !!(window.claude && window.claude.use);
+async function initDownloads(){
+  if(inClaudeHost){
+    try{ downloadsCap = await window.claude.use("downloads"); }catch(e){ downloadsCap = null; }
+  }
+  const usable = inClaudeHost ? !!downloadsCap : true; // fora do app da Claude, o download comum do navegador funciona
+  document.querySelectorAll(".dlcard .btn").forEach(btn=>{
+    btn.disabled = !usable;
+    if(!usable){ btn.nextElementSibling.textContent = "Download indisponível neste visualizador — use a tabela completa abaixo."; }
+  });
+}
+async function baixar(filename, gen, statusEl, btn){
+  btn.disabled = true;
+  statusEl.textContent = "Preparando…";
+  try{
+    const csv = gen();
+    if(downloadsCap){
+      const res = await downloadsCap.save({filename, data: csv});
+      statusEl.textContent = res.status==="saved" ? "Baixado ✓" : "Enviado ✓";
+    } else {
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 4000);
+      statusEl.textContent = "Baixado ✓";
+    }
+  }catch(err){
+    const code = err && err.code;
+    statusEl.textContent = code==="declined" ? "Cancelado." : "Não foi possível salvar.";
+  }
+  btn.disabled = false;
+  setTimeout(()=>{ statusEl.textContent=""; }, 4000);
+}
+function renderDownloads(){
+  const specs = [
+    {title:"Menor e maior preço", desc:"O extremo de cada combustível, com posto, endereço e data.", file:"colatina-extremos.csv", gen:csvExtremos},
+    {title:"Médias por posto", desc:"Preço médio e nº de amostras por posto e combustível.", file:"colatina-medias.csv", gen:csvMedias},
+    {title:"Preço mais recente", desc:"Último preço coletado em cada posto e combustível.", file:"colatina-mais-recentes.csv", gen:csvRecentes},
+    {title:"Base completa", desc:"As 449 coletas, para reconstruir qualquer combinação de posto e combustível.", file:"colatina-completo.csv", gen:csvCompleto},
+  ];
+  const el = document.getElementById("dlgrid");
+  el.innerHTML = specs.map((s,i)=>
+    '<div class="card dlcard"><h3>'+s.title+'</h3><p>'+s.desc+'</p>'+
+    '<button class="btn" data-i="'+i+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>Baixar CSV</button>'+
+    '<div class="status"></div></div>'
+  ).join("");
+  el.querySelectorAll(".btn").forEach((btn,i)=>{
+    btn.addEventListener("click", ()=> baixar(specs[i].file, specs[i].gen, btn.nextElementSibling, btn));
+  });
+  initDownloads();
+
+  const traw = document.getElementById("traw");
+  const allRows = DATA.rows.map(([p,f,d,v])=>{ const posto=DATA.postos[p]; return [posto.nome,posto.bairro,FUEL_LABEL[f],v,d]; })
+    .sort((a,b)=> a[0].localeCompare(b[0]) || a[4].localeCompare(b[4]));
+  traw.innerHTML = "<thead><tr><th>Posto</th><th>Bairro</th><th>Combustível</th><th class='num'>Valor</th><th>Data</th></tr></thead>"+
+    "<tbody>"+allRows.map(r=>"<tr><td>"+r[0]+"</td><td>"+r[1]+"</td><td>"+r[2]+"</td><td class='num'>"+money(r[3])+"</td><td>"+dateBRfull(r[4])+"</td></tr>").join("")+"</tbody>";
+}
+
+/* ---------- tabs ---------- */
+function initTabs(){
+  const buttons = document.querySelectorAll("#tabs button");
+  buttons.forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      buttons.forEach(b=>b.setAttribute("aria-selected", b===btn ? "true":"false"));
+      document.querySelectorAll("section.panel").forEach(p=>{ p.hidden = p.id !== "panel-"+btn.dataset.tab; });
+    });
+  });
+}
+
+/* ---------- boot ---------- */
+function boot(){
+  renderStats();
+  renderExtremos();
+  renderChips(document.getElementById("fmedias"), f=>renderMedias(f));
+  renderMedias(null);
+  renderChips(document.getElementById("frecente"), f=>renderRecente(f));
+  renderRecente(null);
+  populateEvolucaoControls();
+  renderDownloads();
+  initTabs();
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", boot); else boot();
+
+})();
+</script>
